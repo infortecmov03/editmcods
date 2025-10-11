@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Wrapper to build Android APK for EdITMcode PWA via Capacitor",
   "scripts": {
-    "prepare-web": "powershell -File tools/copy-web.ps1",
+  "prepare-web": "node ./tools/copy-web.js",
     "init-capacitor": "npx cap init com.infortec.editmcods EditMcods --web-dir=www",
     "add-android": "npx cap add android",
     "copy": "npx cap copy",
