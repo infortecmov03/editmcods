@@ -1,0 +1,17 @@
+.CodeMirror-hints { position: absolute; z-index: 10000; background: #1e1e1e; color: #ddd; border: 1px solid rgba(255,255,255,0.06); box-shadow: 0 8px 20px rgba(0,0,0,0.35); padding: 6px; border-radius: 6px; font-family: "Segoe UI", Roboto, system-ui, sans-serif; font-size: 13px; min-width: 220px; max-width: 520px; }
+.CodeMirror-hints-list { list-style: none; margin: 0; padding: 0; max-height: 260px; overflow: auto; }
+.CodeMirror-hints-list li.CodeMirror-hint { display: flex; gap: 8px; align-items: center; padding: 8px 10px; cursor: pointer; white-space: nowrap; color: #ddd; }
+.CodeMirror-hint-active { background: linear-gradient(90deg, rgba(0,122,204,0.12), rgba(0,122,204,0.06)); color: #fff; }
+.hint-icon { width: 18px; height: 18px; display:inline-block; color: #f0c674; }
+.hint-main { font-weight: 600; margin-right: 8px; }
+.hint-desc { color: #bfbfbf; font-size: 11px; margin-left: auto; }
+.CodeMirror-hints-list li .fab { font-size: 14px; }
+/* SVG icon wrapper */
+.hint-icon svg { width: 18px; height: 18px; display: block; }
+.hint-shortcut { font-size: 11px; color: #9aa5b1; margin-left: 8px; }
+.CodeMirror-hints::after { content: ' '; display:block; height:6px; }
+/* header and animation */
+.CodeMirror-hints-header { font-size: 12px; color: #9aa5b1; padding: 4px 6px; border-bottom: 1px solid rgba(255,255,255,0.02); margin-bottom: 6px; }
+.CodeMirror-hints { animation: cm-hint-in 150ms cubic-bezier(0.2,0,0,1); }
+@keyframes cm-hint-in { from { transform: translateY(-6px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.hint-shortcut { background: rgba(255,255,255,0.03); padding: 4px 6px; border-radius: 4px; }

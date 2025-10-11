@@ -1,0 +1,15 @@
+{
+  "name": "EdITMcods Mobile - Offline",
+  "short_name": "EdITMcods",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1e1e1e",
+  "theme_color": "#2b2b2b",
+  "icons": [
+    {
+      "src": "imgsvg.html",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

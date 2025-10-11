@@ -1,0 +1,17 @@
+{
+  "name": "editmcods-app",
+  "version": "1.0.0",
+  "description": "Wrapper to build Android APK for EdITMcode PWA via Capacitor",
+  "scripts": {
+    "prepare-web": "powershell -File tools/copy-web.ps1",
+    "init-capacitor": "npx cap init com.infortec.editmcods EditMcods --web-dir=www",
+    "add-android": "npx cap add android",
+    "copy": "npx cap copy",
+    "open-android": "npx cap open android",
+    "build-android": "cd android && .\\gradlew assembleRelease"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^5.0.0",
+    "@capacitor/android": "^5.0.0"
+  }
+}
