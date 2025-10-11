@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android APK from PWA
 
 on:
   push:
@@ -11,9 +11,12 @@ jobs:
     timeout-minutes: 60
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
-    - name: Setup Java and Node
+    - name: Setup build environment
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
@@ -28,26 +31,82 @@ jobs:
       run: |
         npm ci
 
-    - name: Build web assets
+    - name: Debug project structure
       run: |
-        npm run build
+        echo "=== Project Structure ==="
+        ls -la
+        echo "=== Tools directory ==="
+        ls -la tools/ || echo "No tools directory"
+        echo "=== Web source check ==="
+        find . -name "index.html" -o -name "*.js" -o -name "*.css" | head -10
 
-    - name: Setup Android
-      uses: android-actions/setup-android@v3
+    - name: Prepare web application
+      run: |
+        npm run prepare-web
+        echo "=== After prepare-web ==="
+        ls -la www/ || echo "No www directory created"
 
-    - name: Sync Capacitor
+    - name: Setup Capacitor Android project
+      run: |
+        if [ ! -d "android" ]; then
+          echo "Initializing Capacitor Android project..."
+          npx cap init com.infortec.editmcods EditMcods --web-dir=www
+          npx cap add android
+        else
+          echo "Android project already exists"
+        fi
+
+    - name: Sync web assets to Android
       run: |
         npx cap sync android
+        echo "=== Android project structure ==="
+        ls -la android/
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
 
     - name: Build Android APK
       run: |
         cd android
         chmod +x gradlew
-        ./gradlew assembleRelease
+        echo "=== Building Release APK ==="
+        ./gradlew assembleRelease --no-daemon --stacktrace
+        echo "=== Build completed ==="
 
-    - name: Upload APK
+    - name: List generated APKs
+      run: |
+        echo "=== Generated APK Files ==="
+        find android/app/build/outputs/apk/ -name "*.apk" -type f | while read file; do
+          echo "📦 $(basename "$file") - $(du -h "$file" | cut -f1)"
+        done
+
+    - name: Upload APK artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: android-app
-        path: android/app/build/outputs/apk/release/*.apk
+        name: android-apk-build-${{ github.run_number }}
+        path: |
+          android/app/build/outputs/apk/release/*.apk
+          android/app/build/outputs/apk/debug/*.apk
         retention-days: 30
+        if-no-files-found: error
+
+    - name: Create release
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: build-${{ github.run_number }}
+        name: "Build #${{ github.run_number }}"
+        body: |
+          Automated APK build from EdITMcode PWA wrapper.
+          
+          **Build Information:**
+          - Commit: [${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
+          - Workflow: [${{ github.workflow }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          - Branch: ${{ github.ref_name }}
+          
+          Download the APK file above and install on your Android device.
+        files: android/app/build/outputs/apk/release/*.apk
+        draft: false
+        prerelease: true
