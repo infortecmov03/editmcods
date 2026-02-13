@@ -1,0 +1,51 @@
+/* src/ui/components/editor/CodeEditor.css */
+
+.code-editor-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  /* Uses CSS variables from theme.css for background and foreground colors */
+  background-color: var(--editor-background);
+  color: var(--editor-foreground);
+}
+
+/* 
+  This is our new single element for editing and display.
+  It replaces the old textarea + div structure.
+*/
+.code-editor-editable-area {
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  padding-left: 50px; /* Space for line numbers */
+  box-sizing: border-box;
+  white-space: pre-wrap; /* Allows text to wrap and respects whitespace */
+  word-wrap: break-word;   /* Breaks long words that would overflow */
+  overflow-y: auto;      /* Enables vertical scrolling */
+  caret-color: var(--editor-cursor-color); /* Sets the cursor color */
+  outline: none;         /* Removes the default focus outline */
+}
+
+/* The line numbers gutter remains mostly the same */
+.line-numbers-gutter {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50px;
+  height: 100%;
+  padding-top: 10px; 
+  background-color: var(--editor-gutter-background);
+  color: var(--editor-lineno-color);
+  text-align: right;
+  padding-right: 10px;
+  box-sizing: border-box;
+  user-select: none; /* Prevents selecting line numbers */
+  overflow: hidden; /* Hides the part of the gutter that scrolls */
+}
+
+.line-content {
+  height: 20px; /* Should match the line-height of the editor */
+  line-height: 20px;
+  display: block;
+}

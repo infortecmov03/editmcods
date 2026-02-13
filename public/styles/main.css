@@ -1,0 +1,25 @@
+/* Estilos Globais e Tema Escuro Essencial */
+
+body {
+  background-color: #1e1e1e; /* Um fundo escuro padrão */
+  color: #d4d4d4; /* Cor de texto clara para contraste */
+  font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace; /* Fontes de código populares */
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Evita barras de rolagem no corpo da página */
+}
+
+#root {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Estilos básicos para o editor, garantindo que ele ocupe o espaço */
+.editor-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}

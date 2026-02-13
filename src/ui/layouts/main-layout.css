@@ -1,0 +1,37 @@
+/* Layout principal da aplicação */
+.main-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Ocupa a altura inteira da tela */
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+}
+
+/* A área que contém a calha de números e o textarea */
+.editor-main-area {
+  display: flex;
+  flex-grow: 1; /* Faz esta área ocupar todo o espaço vertical restante */
+  overflow: hidden; /* Evita barras de rolagem indesejadas no layout principal */
+}
+
+/* Estilização do <textarea> principal do editor */
+.editor-textarea {
+  flex-grow: 1; /* Ocupa todo o espaço horizontal restante */
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  border: none;
+  padding-left: 15px;
+  font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5; /* IMPORTANTE: Deve ser o mesmo do .line-number */
+  resize: none; /* Impede o usuário de redimensionar o textarea */
+  outline: none; /* Remove a borda de foco padrão */
+  overflow-y: auto; /* Adiciona uma barra de rolagem vertical quando necessário */
+  white-space: pre; /* Preserva espaços e quebras de linha */
+  caret-color: #aeafad; /* Cor do cursor de texto */
+}
+
+/* Garante que o preenchimento do textarea não adicione largura extra */
+.editor-textarea::placeholder {
+  color: #6a737d;
+}

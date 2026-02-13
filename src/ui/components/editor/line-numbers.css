@@ -1,0 +1,47 @@
+/* Estilos para a calha de números de linha (gutter), inspirado no guia */
+.line-numbers-gutter {
+  width: 55px; /* Largura fixa para simplicidade e robustez */
+  padding: 10px 10px 10px 0; /* Padding consistente com o editor */
+  text-align: right;
+  color: #858585;
+  background: #1e1e1e;
+  border-right: 1px solid #404040; /* Borda divisória */
+  user-select: none;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit; /* Herda a altura da linha do contêiner */
+  box-sizing: border-box;
+  overflow: hidden; /* Esconde números que possam exceder a área */
+}
+
+/* Contêiner para cada linha */
+.line-content {
+  /* Usamos a altura da linha do pai para alinhamento */
+  height: 1.5em; 
+  padding-right: 10px; /* Espaçamento da borda */
+  box-sizing: border-box;
+  white-space: pre;
+  cursor: pointer;
+}
+
+.line-number {
+  display: inline-block;
+  vertical-align: top;
+}
+
+/* Ícone de breakpoint */
+.gutter-decoration {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 5px; /* Espaço entre o ícone e o número */
+  vertical-align: middle;
+}
+
+.breakpoint {
+  width: 10px;
+  height: 10px;
+  background-color: #e52525;
+  border-radius: 50%;
+  border: 1px solid #c52121;
+}

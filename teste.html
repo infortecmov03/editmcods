@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Texto - Teste</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1e1e1e;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .editor {
+            width: 90%;
+            height: 90%;
+            background: #1e1e1e;
+            border: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .toolbar {
+            background: #252526;
+            padding: 8px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            gap: 4px;
+        }
+
+        .toolbar button {
+            background: #0e639c;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 13px;
+            min-width: 60px;
+        }
+
+        .toolbar button:hover {
+            background: #1177bb;
+        }
+
+        .editor-area {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .line-numbers {
+            background: #252526;
+            padding: 8px 5px;
+            text-align: right;
+            color: #858585;
+            border-right: 1px solid #333;
+            font-size: 14px;
+            line-height: 1.5;
+            min-width: 45px;
+            user-select: none;
+            overflow: hidden;
+            font-family: 'Courier New', monospace;
+            white-space: pre;
+        }
+
+        #editor {
+            flex: 1;
+            padding: 8px;
+            background: transparent;
+            color: #d4d4d4;
+            border: none;
+            outline: none;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: none;
+            white-space: pre;
+            overflow: auto;
+        }
+
+        .status-bar {
+            background: #007acc;
+            color: white;
+            padding: 4px 8px;
+            font-size: 12px;
+            display: flex;
+            gap: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="editor">
+        <div class="toolbar">
+            <button onclick="carregarExemplo()">Exemplo</button>
+            <button onclick="limparEditor()">Limpar</button>
+            <button onclick="focarEditor()">Focar</button>
+        </div>
+        
+        <div class="editor-area">
+            <div class="line-numbers" id="lineNumbers">1</div>
+            <textarea id="editor" spellcheck="false" placeholder="Digite aqui..."></textarea>
+        </div>
+        
+        <div class="status-bar" id="statusBar">
+            <span>Ln 1, Col 1</span>
+            <span>Linhas: 1</span>
+        </div>
+    </div>
+
+    <script>
+        // Classe Cursor
+        class Cursor {
+            constructor() {
+                this.lineNumber = 1;
+                this.column = 1;
+                this.preferredColumns = new Map();
+            }
+
+            getPosition() {
+                return { lineNumber: this.lineNumber, column: this.column };
+            }
+
+            setPosition(lineNumber, column, totalLines, getLineLength) {
+                this.lineNumber = Math.max(1, Math.min(lineNumber, totalLines));
+                const maxCol = getLineLength(this.lineNumber);
+                this.column = Math.max(1, Math.min(column, maxCol + 1));
+                this.preferredColumns.set(this.lineNumber, this.column);
+            }
+
+            moveUp(totalLines, getLineLength) {
+                if (this.lineNumber > 1) {
+                    this.preferredColumns.set(this.lineNumber, this.column);
+                    this.lineNumber--;
+                    const preferred = this.preferredColumns.get(this.lineNumber) || this.column;
+                    const maxCol = getLineLength(this.lineNumber);
+                    this.column = Math.min(preferred, maxCol + 1);
+                }
+            }
+
+            moveDown(totalLines, getLineLength) {
+                if (this.lineNumber < totalLines) {
+                    this.preferredColumns.set(this.lineNumber, this.column);
+                    this.lineNumber++;
+                    const preferred = this.preferredColumns.get(this.lineNumber) || this.column;
+                    const maxCol = getLineLength(this.lineNumber);
+                    this.column = Math.min(preferred, maxCol + 1);
+                }
+            }
+
+            moveLeft(getLineLength) {
+                const currentLineLength = getLineLength(this.lineNumber);
+                
+                if (this.column > 1) {
+                    this.column--;
+                } else if (this.lineNumber > 1) {
+                    this.preferredColumns.set(this.lineNumber, this.column);
+                    this.lineNumber--;
+                    this.column = getLineLength(this.lineNumber) + 1;
+                    this.preferredColumns.set(this.lineNumber, this.column);
+                }
+            }
+
+            moveRight(getLineLength, totalLines) {
+                const currentLineLength = getLineLength(this.lineNumber);
+                
+                if (this.column <= currentLineLength) {
+                    this.column++;
+                } else if (this.lineNumber < totalLines) {
+                    this.preferredColumns.set(this.lineNumber, this.column);
+                    this.lineNumber++;
+                    this.column = 1;
+                    this.preferredColumns.set(this.lineNumber, 1);
+                }
+            }
+        }
+
+        // Classe Document
+        class Document {
+            constructor() {
+                this.lines = [''];
+            }
+
+            setContent(content) {
+                this.lines = content ? content.split('\n') : [''];
+            }
+
+            getContent() {
+                return this.lines.join('\n');
+            }
+
+            getLineCount() {
+                return this.lines.length;
+            }
+
+            getLineLength(lineNumber) {
+                if (lineNumber < 1 || lineNumber > this.lines.length) return 0;
+                return this.lines[lineNumber - 1].length;
+            }
+
+            insertText(text, lineNumber, column) {
+                const lineIndex = lineNumber - 1;
+                const line = this.lines[lineIndex];
+                const before = line.substring(0, column - 1);
+                const after = line.substring(column - 1);
+                
+                this.lines[lineIndex] = before + text + after;
+                
+                return {
+                    lineNumber: lineNumber,
+                    column: column + text.length
+                };
+            }
+
+            insertNewLine(lineNumber, column) {
+                const lineIndex = lineNumber - 1;
+                const line = this.lines[lineIndex];
+                const before = line.substring(0, column - 1);
+                const after = line.substring(column - 1);
+                
+                const indent = before.match(/^\s*/)?.[0] || '';
+                
+                this.lines[lineIndex] = before;
+                this.lines.splice(lineIndex + 1, 0, indent + after);
+                
+                return {
+                    lineNumber: lineNumber + 1,
+                    column: indent.length + 1
+                };
+            }
+
+            deleteBackward(lineNumber, column) {
+                const lineIndex = lineNumber - 1;
+                
+                if (column > 1) {
+                    const line = this.lines[lineIndex];
+                    const before = line.substring(0, column - 2);
+                    const after = line.substring(column - 1);
+                    this.lines[lineIndex] = before + after;
+                    
+                    return {
+                        lineNumber: lineNumber,
+                        column: column - 1
+                    };
+                } else if (lineNumber > 1) {
+                    const prevLine = this.lines[lineIndex - 1];
+                    const currentLine = this.lines[lineIndex];
+                    
+                    const newColumn = prevLine.length + 1;
+                    this.lines[lineIndex - 1] = prevLine + currentLine;
+                    this.lines.splice(lineIndex, 1);
+                    
+                    return {
+                        lineNumber: lineNumber - 1,
+                        column: newColumn
+                    };
+                }
+                
+                return { lineNumber, column };
+            }
+        }
+
+        // Inicialização
+        const document = new Document();
+        const cursor = new Cursor();
+        
+        const editor = document.getElementById('editor');
+        const lineNumbers = document.getElementById('lineNumbers');
+        const statusBar = document.getElementById('statusBar');
+
+        function updateEditor() {
+            // Atualiza conteúdo
+            editor.value = document.getContent();
+            
+            // Atualiza números das linhas
+            const count = document.getLineCount();
+            let numbers = '';
+            for (let i = 1; i <= count; i++) {
+                numbers += i + '\n';
+            }
+            lineNumbers.textContent = numbers.trim() || '1';
+            
+            // Atualiza status
+            const pos = cursor.getPosition();
+            statusBar.innerHTML = `<span>Ln ${pos.lineNumber}, Col ${pos.column}</span><span>Linhas: ${count}</span>`;
+            
+            // Sincroniza cursor
+            syncCursorPosition();
+        }
+
+        function syncCursorPosition() {
+            const pos = cursor.getPosition();
+            const lines = editor.value.split('\n');
+            
+            let absolutePos = 0;
+            for (let i = 0; i < pos.lineNumber - 1; i++) {
+                absolutePos += (lines[i]?.length || 0) + 1;
+            }
+            absolutePos += Math.min(pos.column - 1, lines[pos.lineNumber - 1]?.length || 0);
+            
+            editor.selectionStart = absolutePos;
+            editor.selectionEnd = absolutePos;
+        }
+
+        function getLineLength(lineNumber) {
+            return document.getLineLength(lineNumber);
+        }
+
+        // Eventos do teclado
+        editor.addEventListener('keydown', (e) => {
+            const pos = cursor.getPosition();
+            
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                cursor.moveUp(document.getLineCount(), getLineLength);
+                updateEditor();
+            }
+            else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                cursor.moveDown(document.getLineCount(), getLineLength);
+                updateEditor();
+            }
+            else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                cursor.moveLeft(getLineLength);
+                updateEditor();
+            }
+            else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                cursor.moveRight(getLineLength, document.getLineCount());
+                updateEditor();
+            }
+            else if (e.key === 'Enter') {
+                e.preventDefault();
+                const newPos = document.insertNewLine(pos.lineNumber, pos.column);
+                cursor.setPosition(newPos.lineNumber, newPos.column, document.getLineCount(), getLineLength);
+                updateEditor();
+            }
+            else if (e.key === 'Backspace') {
+                e.preventDefault();
+                const newPos = document.deleteBackward(pos.lineNumber, pos.column);
+                cursor.setPosition(newPos.lineNumber, newPos.column, document.getLineCount(), getLineLength);
+                updateEditor();
+            }
+            else if (e.key === 'Home') {
+                e.preventDefault();
+                cursor.column = 1;
+                cursor.preferredColumns.set(cursor.lineNumber, 1);
+                updateEditor();
+            }
+            else if (e.key === 'End') {
+                e.preventDefault();
+                const lineLength = getLineLength(cursor.lineNumber);
+                cursor.column = lineLength + 1;
+                cursor.preferredColumns.set(cursor.lineNumber, lineLength + 1);
+                updateEditor();
+            }
+            else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+                e.preventDefault();
+                const newPos = document.insertText(e.key, pos.lineNumber, pos.column);
+                cursor.setPosition(newPos.lineNumber, newPos.column, document.getLineCount(), getLineLength);
+                updateEditor();
+            }
+        });
+
+        // Clique do mouse
+        editor.addEventListener('click', () => {
+            const pos = editor.selectionStart;
+            const text = editor.value;
+            const lines = text.split('\n');
+            
+            let charCount = 0;
+            for (let i = 0; i < lines.length; i++) {
+                if (pos <= charCount + lines[i].length) {
+                    cursor.setPosition(i + 1, pos - charCount + 1, document.getLineCount(), getLineLength);
+                    break;
+                }
+                charCount += lines[i].length + 1;
+            }
+            
+            updateEditor();
+        });
+
+        // Scroll sincronizado
+        editor.addEventListener('scroll', () => {
+            lineNumbers.scrollTop = editor.scrollTop;
+        });
+
+        // Funções globais
+        window.carregarExemplo = () => {
+            const exemplo = `function hello() {
+    console.log("Hello World!");
+    if (true) {
+        return 42;
+    }
+}
+
+// Teste o cursor
+// Setas mantém a coluna
+// Enter cria nova linha`;
+            
+            document.setContent(exemplo);
+            cursor.setPosition(1, 1, document.getLineCount(), getLineLength);
+            updateEditor();
+            editor.focus();
+        };
+
+        window.limparEditor = () => {
+            document.setContent('');
+            cursor.setPosition(1, 1, 1, getLineLength);
+            updateEditor();
+            editor.focus();
+        };
+
+        window.focarEditor = () => {
+            editor.focus();
+        };
+
+        // Inicialização
+        document.setContent('');
+        updateEditor();
+        editor.focus();
+    </script>
+</body>
+</html>

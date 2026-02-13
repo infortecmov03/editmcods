@@ -1,0 +1,83 @@
+/*
+  Estilos para o wrapper do editor, implementando a sobreposição do
+  <pre> (realce) e do <textarea> (entrada).
+*/
+
+.code-wrapper {
+  position: relative; /* Cria o contexto para o posicionamento absoluto dos filhos */
+  flex-grow: 1; /* Faz o wrapper ocupar todo o espaço disponível */
+  font-family: 'Fira Code', 'JetBrains Mono', monospace;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/*
+  ESTILOS COMUNS para <textarea> e <pre>
+  Isto é CRUCIAL para que o texto digitado e o realce se alinhem perfeitamente.
+*/
+.code-editor-input,
+.code-highlighter {
+  /* Geometria e Posição */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  margin: 0;
+  box-sizing: border-box; /* Garante que o padding não altere o tamanho total */
+
+  /* Tipografia (herdada do wrapper) */
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  
+  /* Comportamento do texto */
+  white-space: pre; /* Mantém espaços e impede quebra de linha automática */
+  tab-size: 2; /* Define o tamanho do Tab */
+  -moz-tab-size: 2;
+}
+
+/* 
+  TEXTAREA (camada de cima, para digitação)
+*/
+.code-editor-input {
+  z-index: 1;
+  resize: none;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  overflow: auto; /* Apenas o textarea tem scroll, ele é a "fonte da verdade" */
+
+  /* Mágica: o texto é invisível, mas o cursor (caret) não */
+  color: transparent;
+  caret-color: rgb(207, 59, 59);
+}
+
+/*
+  PRE (camada de baixo, para o realce de sintaxe)
+*/
+.code-highlighter {
+  z-index: 0;
+  background-color: #1e1e1e;
+  pointer-events: none; /* Ignora cliques, que devem ir para o textarea */
+  overflow: hidden;     /* A rolagem é controlada pelo textarea */
+}
+
+/* Classes de Token para o realce */
+.token-keyword {
+  color: #c586c0;
+}
+.token-string {
+  color: #ce9178;
+}
+.token-number {
+  color: #b5cea8;
+}
+.token-comment {
+  color: #6a9955;
+  font-style: italic;
+}
+.token-punctuation, .token-operator {
+  color: #d4d4d4;
+}

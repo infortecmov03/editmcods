@@ -1,0 +1,13 @@
+# Ignora as pastas e arquivos que não precisam ser formatados pelo Prettier
+
+node_modules/
+dist/
+build/
+coverage/
+
+# Arquivos de log
+*.log
+
+# Arquivos de lock
+package-lock.json
+yarn.lock

@@ -1,0 +1,17 @@
+.editor-container {
+    display: flex;
+    flex-direction: column;
+    width: 90%;
+    height: 90%;
+    border: 1px solid #333;
+    background-color: #1e1e1e;
+    overflow: hidden; /* Garante que o conteúdo não transborde */
+    border-radius: 4px; /* Bordas arredondadas para um visual mais suave */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); /* Sombra para dar profundidade */
+}
+
+.editor-area {
+    flex: 1;
+    display: flex;
+    overflow: hidden; /* Essencial para que o scroll interno funcione corretamente */
+}

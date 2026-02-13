@@ -1,0 +1,48 @@
+
+/* src/core/highlight/highlights/Highlighter.css */
+
+/* 
+  Este arquivo define os estilos para as classes de token geradas pelo Highlighter.
+  Estas cores são baseadas em um tema escuro (dark theme) popular.
+*/
+
+.hl-keyword {
+  color: #C586C0; /* Roxo/Rosa para palavras-chave como if, class, const */
+}
+
+.hl-identifier {
+  color: #9CDCFE; /* Azul claro para variáveis e nomes de funções */
+}
+
+.hl-operator {
+  color: #D4D4D4; /* Branco padrão para operadores como +, =, => */
+}
+
+.hl-number {
+  color: #B5CEA8; /* Verde claro para literais numéricos */
+}
+
+.hl-string {
+  color: #CE9178; /* Laranja para strings */
+}
+
+.hl-comment {
+  color: #6A9955; /* Verde escuro para comentários */
+  font-style: italic;
+}
+
+.hl-delimiter {
+  color: #D4D4D4; /* Branco para {}, [], () */
+}
+
+.hl-punctuation {
+  color: #D4D4D4; /* Branco para ,, ;, . */
+}
+
+.hl-builtin {
+  color: #4EC9B0; /* Ciano para objetos built-in como console, Math */
+}
+
+.hl-type {
+  color: #4EC9B0; /* Ciano/Turquesa para tipos do TS como string, boolean, e interfaces */
+}

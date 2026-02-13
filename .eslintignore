@@ -1,0 +1,10 @@
+# Ignora as pastas e arquivos que não precisam ser verificados pelo ESLint
+
+node_modules/
+dist/
+build/
+coverage/
+
+# Arquivos de configuração
+*.config.js
+*.config.ts
